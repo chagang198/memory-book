@@ -1,6 +1,47 @@
+import UPNG from "npm:upng-js@2.1.0";
+
 const MCP_ENDPOINT = "https://mcp.api-inference.modelscope.net/94cf818d294546/mcp";
 const MCP_KEY = Deno.env.get("MEMORY_API_KEY") ?? "";
 const ACCESS_TOKEN = Deno.env.get("ACCESS_TOKEN") ?? "";
+
+function makeIcon(): Uint8Array {
+  const S = 180;
+  const data = new Uint8Array(S * S * 4);
+  const cx = 90, cy = 90;
+  const dots = [[46, 50, 3], [141, 38, 2.4], [154, 132, 3], [36, 120, 2], [120, 150, 1.6]];
+  for (let y = 0; y < S; y++) {
+    for (let x = 0; x < S; x++) {
+      const idx = (y * S + x) * 4;
+      const t = y / S;
+      let r = Math.round(13 + 15 * t);
+      let g = Math.round(19 + 20 * t);
+      let b = Math.round(34 + 32 * t);
+      const dx = x - cx, dy = y - cy;
+      const u = Math.abs(dx) / 60;
+      const v = Math.abs(dy) / 60;
+      if (Math.pow(u, 2 / 3) + Math.pow(v, 2 / 3) <= 1) {
+        r = 238; g = 242; b = 251;
+        const u2 = Math.abs(dx) / 34;
+        const v2 = Math.abs(dy) / 34;
+        if (Math.pow(u2, 2 / 3) + Math.pow(v2, 2 / 3) <= 1) {
+          r = 147; g = 169; b = 210;
+        }
+      }
+      for (const [px, py, pr] of dots) {
+        const ddx = x - px, ddy = y - py;
+        if (ddx * ddx + ddy * ddy <= pr * pr) { r = 185; g = 200; b = 228; }
+      }
+      data[idx] = r; data[idx + 1] = g; data[idx + 2] = b; data[idx + 3] = 255;
+    }
+  }
+  return new Uint8Array(UPNG.encode([data], S, S, 0));
+}
+
+let iconPng: Uint8Array | null = null;
+function getIcon(): Uint8Array {
+  if (!iconPng) iconPng = makeIcon();
+  return iconPng;
+}
 
 const HTML = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -292,9 +333,7 @@ Deno.serve(async (req) => {
     });
   }
   if (path === "/apple-touch-icon.png") {
-    return new Response(await Deno.readFile(new URL("./apple-touch-icon.png", import.meta.url)), {
-      headers: { "Content-Type": "image/png" },
-    });
+    return new Response(getIcon(), { headers: { "Content-Type": "image/png" } });
   }
 
   const t = req.headers.get("x-token");
