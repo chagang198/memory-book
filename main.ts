@@ -8,6 +8,11 @@ const HTML = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星回手记</title>
+<link rel="icon" type="image/svg+xml" href="/icon.svg">
+<link rel="apple-touch-icon" href="/icon.svg">
+<meta name="apple-mobile-web-app-title" content="星回手记">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
   :root{
     --bg1:#0e1420;--bg2:#151d2e;
@@ -278,8 +283,13 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const path = url.pathname;
 
-  if (path === "/" || path === "/index.html") {
+  if (path === "/") {
     return new Response(HTML, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+  }
+  if (path === "/icon.svg") {
+    return new Response(await Deno.readTextFile(new URL("./icon.svg", import.meta.url)), {
+      headers: { "Content-Type": "image/svg+xml" },
+    });
   }
 
   const t = req.headers.get("x-token");
