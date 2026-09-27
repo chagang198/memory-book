@@ -129,7 +129,9 @@ function hideMask(){ $("#mask").style.display="none"; }
 async function api(path){
   var res = await fetch(path, { headers: { "X-Token": token } });
   if(res.status === 401) throw new Error("密码不对");
-  return await res.json();
+  var data = await res.json();
+  if(data && data.isError) throw new Error((data.content && data.content[0] && data.content[0].text) || "读取失败");
+  return data;
 }
 function extractPayload(result){
   if(result && result.structuredContent) return result.structuredContent;
@@ -288,7 +290,7 @@ Deno.serve(async (req) => {
   if (path === "/api/memory") {
     const r = await callMCP("tools/call", {
       name: "get_user_profile",
-      arguments: { size: 100, current: 1, include_preference: true },
+      arguments: { size: 50, current: 1, include_preference: true },
     });
     return json(r.result ?? r);
   }
