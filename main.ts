@@ -9,7 +9,7 @@ const HTML = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>星回手记</title>
 <link rel="icon" type="image/svg+xml" href="/icon.svg">
-<link rel="apple-touch-icon" href="/icon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="星回手记">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -289,6 +289,11 @@ Deno.serve(async (req) => {
   if (path === "/icon.svg") {
     return new Response(await Deno.readTextFile(new URL("./icon.svg", import.meta.url)), {
       headers: { "Content-Type": "image/svg+xml" },
+    });
+  }
+  if (path === "/apple-touch-icon.png") {
+    return new Response(await Deno.readFile(new URL("./apple-touch-icon.png", import.meta.url)), {
+      headers: { "Content-Type": "image/png" },
     });
   }
 
